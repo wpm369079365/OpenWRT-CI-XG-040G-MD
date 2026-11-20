@@ -5,7 +5,9 @@
 name: WRT-CORE
 
 #发布 Release 需要写权限（仓库默认 token 权限是 read-only）
-permissions: write-all
+#注意：可被调用工作流的 permissions 不能超过调用方，这里只声明 contents: write
+permissions:
+  contents: write
 
 on:
   workflow_call:
