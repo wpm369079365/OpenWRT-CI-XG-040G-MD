@@ -1,24 +1,30 @@
 #科学插件调整
-#nikki
-CONFIG_PACKAGE_luci-app-nikki=y
-CONFIG_PACKAGE_mihomo=y
-#CONFIG_PACKAGE_luci-app-openclash=y
+#HomeProxy（sing-box 前端）
+CONFIG_PACKAGE_luci-app-homeproxy=y
+CONFIG_PACKAGE_sing-box=y
+#关闭 naive 出站，避免引入 libcronet（需要 gn/ninja 交叉编译，容易失败）
+# CONFIG_SING_BOX_BUILD_NAIVE_OUTBOUND is not set
 
-#ssr plus
-CONFIG_PACKAGE_luci-app-ssr-plus=y
-CONFIG_PACKAGE_xray-core=y
+#ddns
+CONFIG_PACKAGE_luci-app-ddns=y
+CONFIG_PACKAGE_ddns-scripts=y
+CONFIG_PACKAGE_ddns-scripts-services=y
+CONFIG_PACKAGE_ddns-scripts-aliyun=y
+CONFIG_PACKAGE_ddns-scripts-cloudflare=y
+CONFIG_PACKAGE_ddns-scripts-dnspod=y
+CONFIG_PACKAGE_ddns-scripts-noip=y
+CONFIG_PACKAGE_ddns-scripts-freedns=y
 
-#lucky
-CONFIG_PACKAGE_luci-app-lucky=y
-#增加插件
-CONFIG_PACKAGE_luci-app-autoreboot=y
-CONFIG_PACKAGE_luci-app-gecoosac=y
-#CONFIG_PACKAGE_luci-app-mini-diskmanager=y
-#CONFIG_PACKAGE_luci-app-partexp=y
-#CONFIG_PACKAGE_luci-app-samba4=y
-#CONFIG_PACKAGE_luci-app-upnp=y
-CONFIG_PACKAGE_luci-app-wolplus=y
-CONFIG_PACKAGE_luci-app-store=y
+#openlist
+CONFIG_PACKAGE_luci-app-openlist=y
+CONFIG_PACKAGE_openlist=y
+
+#PPPoE 拨号（接光纤后由这台机器拨号上网）
+CONFIG_PACKAGE_ppp=y
+CONFIG_PACKAGE_ppp-mod-pppoe=y
+CONFIG_PACKAGE_luci-proto-ppp=y
+CONFIG_PACKAGE_luci-proto-ipv6=y
+
 #删除插件
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 CONFIG_PACKAGE_luci-app-wol=n
@@ -157,6 +163,4 @@ CONFIG_PACKAGE_wpad-openssl=y
 
 #主题
 CONFIG_PACKAGE_ucode-mod-math=y
-CONFIG_PACKAGE_luci-theme-tp=y
-CONFIG_PACKAGE_luci-theme-footstrap=y
-CONFIG_PACKAGE_luci-app-vantage=y
+CONFIG_PACKAGE_luci-theme-argon=y

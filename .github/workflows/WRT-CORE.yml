@@ -4,6 +4,9 @@
 #云编译公用核心
 name: WRT-CORE
 
+#发布 Release 需要写权限（仓库默认 token 权限是 read-only）
+permissions: write-all
+
 on:
   workflow_call:
     inputs:
@@ -227,29 +230,37 @@ jobs:
           fi
 
       - name: Release Firmware
-        uses: softprops/action-gh-release@master
-        with:
-          tag_name: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_BRANCH}}-${{env.WRT_DATE}}
-          files: ./wrt/upload/*.*
-          body: |
-            这是个平台固件包，内含多个设备！
-            请注意选择你需要的设备固件！
-            不要问，刷就完事了！
+        if: env.WRT_TEST != 'true'
+        run: |
+          cd ./wrt/upload
 
-            全系带开源硬件加速，别问了！
+          TAG="$WRT_CONFIG-$WRT_INFO-$WRT_BRANCH-$WRT_DATE"
+          NOTES="$RUNNER_TEMP/release-notes.md"
 
-            源码：${{env.WRT_REPO}}
-            分支：${{env.WRT_BRANCH}}
-            提交：${{env.WRT_HASH}}
+          {
+            echo "这是个平台固件包，内含多个设备！"
+            echo "请注意选择你需要的设备固件！"
+            echo ""
+            echo "源码：$WRT_REPO"
+            echo "分支：$WRT_BRANCH"
+            echo "提交：$WRT_HASH"
+            echo ""
+            echo "配置：$WRT_CONFIG"
+            echo "平台：$WRT_TARGET"
+            echo ""
+            echo "登录地址：$WRT_IP"
+            echo "WIFI名称：$WRT_SSID"
+            echo "WIFI密码：$WRT_WORD"
+            echo ""
+            echo "内核版本：$WRT_KVER"
+            echo "插件列表：$WRT_LIST"
+          } > "$NOTES"
 
-            配置：${{env.WRT_CONFIG}}
-            平台：${{env.WRT_TARGET}}
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" ./* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" ./* --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file "$NOTES" --latest
+          fi
 
-            登录地址：${{env.WRT_IP}}
-            登录密码：${{env.WRT_PW}}
-
-            WIFI名称：${{env.WRT_SSID}}
-            WIFI密码：${{env.WRT_WORD}}
-
-            内核版本：${{env.WRT_KVER}}
-            插件列表：${{env.WRT_LIST}}
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url,assets \
+            --jq '"release: \(.url)  assets: \(.assets | length)"' | tee -a "$GITHUB_STEP_SUMMARY"
