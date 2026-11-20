@@ -67,7 +67,8 @@ env:
 jobs:
   core:
     name: ${{inputs.WRT_SOURCE}}
-    runs-on: ubuntu-latest
+    #固定 24.04：ubuntu-latest 已升到 25.10，immortalwrt 的初始化脚本只认 20.04/22.04/24.04，会直接报 Unsupported OS
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Projects
         uses: actions/checkout@main
