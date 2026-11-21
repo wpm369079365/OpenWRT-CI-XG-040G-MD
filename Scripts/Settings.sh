@@ -79,13 +79,22 @@ fi
 sed -i 's/ucidef_set_interface_lan "lan1 lan2 lan3 lan4"/ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "lan4"/g' target/linux/airoha/an7581/base-files/etc/board.d/02_network
 sed -i 's/interrupts.*//g' target/linux/airoha/dts/an7581-nokia_xg-040g-md-common.dtsi
 
-#设备型号显示：XG-040G-MD -> XG-140G-MD
-#只改设备树的 model 字符串（LuCI 系统信息页读它），不动 compatible，
-#避免 board name / 驱动匹配失效。两个镜像（普通 + UBI）都要改。
-for DTS in target/linux/airoha/dts/an7581-nokia_xg-040g-md.dts \
-           target/linux/airoha/dts/an7581-nokia_xg-040g-md-ubi.dts; do
-	if [ -f "$DTS" ]; then
-		sed -i '/model =/s/XG-040G-MD/XG-140G-MD/g' "$DTS"
+#设备型号显示：改用源码原生的 XG-140G-MD 设备树（用户要求「指向原生」）
+#原生 dts: an7581-nokia_xg-140g-md.dts，model="Nokia Bell XG-140G-MD"，
+#compatible="nokia,xg-140g-md"；与 040g 硬件定义相同，网络/LED 脚本原生都认。
+#做法：把 Device/nokia_xg-040g-md 的 DEVICE_DTS 指向原生 140g dts，
+#并让 DEVICE_MODEL 显示 XG-140G-MD，ALT0 保留 XG-040G-MD 以兼容旧固件升级。
+MK=target/linux/airoha/image/an7581.mk
+if [ -f target/linux/airoha/dts/an7581-nokia_xg-140g-md.dts ]; then
+	#普通镜像：指向原生 140G DTS，型号改 140G-MD，ALT0 改为 040G-MD（双向兼容）
+	sed -i '/^define Device\/nokia_xg-040g-md$/,/^endef$/ {
+		s/DEVICE_MODEL := XG-040G-MD/DEVICE_MODEL := XG-140G-MD/
+		s/DEVICE_ALT0_MODEL := XG-140G-MD/DEVICE_ALT0_MODEL := XG-040G-MD/
+		s/DEVICE_DTS := an7581-nokia_xg-040g-md$/DEVICE_DTS := an7581-nokia_xg-140g-md/
+	}' "$MK"
+	#UBI 镜像：源码无原生 140g-ubi dts，由原生 140g dts 派生（含ubi分区头），型号同步
+	if [ -f target/linux/airoha/dts/an7581-nokia_xg-040g-md-ubi.dts ]; then
+		sed -i '/model =/s/XG-040G-MD/XG-140G-MD/g' target/linux/airoha/dts/an7581-nokia_xg-040g-md-ubi.dts
 	fi
-done
+fi
 
