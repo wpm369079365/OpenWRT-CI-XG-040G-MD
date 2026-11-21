@@ -72,3 +72,23 @@ if [ -f "$RUST_FILE" ]; then
 
 	cd $PKG_PATH && echo "rust has been fixed!"
 fi
+
+#修复 HomeProxy 与 sing-box 1.13+ 不兼容导致「未运行」：
+#源码自带(openwrt-25.12)的 generate_client.uc 仍在 inbound 里写 legacy 字段
+#(sniff / sniff_override_destination)，而 sing-box 自 1.13.0 起移除该格式，
+#配置校验失败 -> 服务起不来。immortalwrt/luci master 版已改为 route 的 action:sniff。
+#两版仅差 sniff 相关 30 余行、import 相同，故只替换这一个脚本，避免混入 master 其他文件。
+HP_GEN=$(find ../feeds/luci/ $PKG_PATH -type f -path '*luci-app-homeproxy*generate_client.uc' 2>/dev/null | head -n1)
+if [ -n "$HP_GEN" ]; then
+	echo " "
+	TMP_GEN="$HP_GEN.hpnew"
+	wget -q --timeout=30 -O "$TMP_GEN" "https://raw.githubusercontent.com/immortalwrt/luci/master/applications/luci-app-homeproxy/root/etc/homeproxy/scripts/generate_client.uc"
+	#校验：新版含 route 的 action:'sniff'，且不再有 legacy 的 sniff_override_destination
+	if [ -s "$TMP_GEN" ] && grep -qE "^[[:space:]]*action: 'sniff'" "$TMP_GEN" && ! grep -q "sniff_override_destination" "$TMP_GEN"; then
+		mv -f "$TMP_GEN" "$HP_GEN"
+		cd $PKG_PATH && echo "homeproxy generate_client.uc patched for sing-box 1.13+!"
+	else
+		echo "homeproxy patch SKIPPED (download failed or unexpected content)"
+		rm -f "$TMP_GEN"
+	fi
+fi

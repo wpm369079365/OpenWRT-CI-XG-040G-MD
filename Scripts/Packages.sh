@@ -56,7 +56,7 @@ UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 #UPDATE_PACKAGE "luci-theme-footstrap" "VizzleTF/luci-theme-footstrap" "main" "pkg"
 UPDATE_PACKAGE "luci-app-vantage" "anothaDev/luci-theme-vantage" "main" "pkg"
 
-#UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
+#HomeProxy 的脚本兼容性补丁见 Handles.sh（新版 generate_client.uc 适配 sing-box 1.13+）
 #UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
 #UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 #UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
