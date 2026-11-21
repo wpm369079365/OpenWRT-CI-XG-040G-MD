@@ -79,3 +79,13 @@ fi
 sed -i 's/ucidef_set_interface_lan "lan1 lan2 lan3 lan4"/ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "lan4"/g' target/linux/airoha/an7581/base-files/etc/board.d/02_network
 sed -i 's/interrupts.*//g' target/linux/airoha/dts/an7581-nokia_xg-040g-md-common.dtsi
 
+#设备型号显示：XG-040G-MD -> XG-140G-MD
+#只改设备树的 model 字符串（LuCI 系统信息页读它），不动 compatible，
+#避免 board name / 驱动匹配失效。两个镜像（普通 + UBI）都要改。
+for DTS in target/linux/airoha/dts/an7581-nokia_xg-040g-md.dts \
+           target/linux/airoha/dts/an7581-nokia_xg-040g-md-ubi.dts; do
+	if [ -f "$DTS" ]; then
+		sed -i '/model =/s/XG-040G-MD/XG-140G-MD/g' "$DTS"
+	fi
+done
+
