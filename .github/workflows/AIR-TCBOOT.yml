@@ -6,6 +6,8 @@ name: AIR-TCBOOT
 on:
   schedule:
     - cron: "0 3 * * *"   # 每天3点 UTC
+  repository_dispatch:
+    types: [build-firmware]
   workflow_dispatch:
     inputs:
       PACKAGE:
@@ -104,8 +106,8 @@ jobs:
       WRT_REPO: ${{ needs.precheck.outputs.wrt_repo }}
       WRT_BRANCH: ${{ needs.precheck.outputs.wrt_branch }}
       WRT_SOURCE: ${{ needs.precheck.outputs.wrt_source }}
-      WRT_PACKAGE: ${{ inputs.PACKAGE || '' }}
-      WRT_TEST: ${{ inputs.TEST == true }}
+      WRT_PACKAGE: ${{ inputs.PACKAGE || github.event.client_payload.PACKAGE || '' }}
+      WRT_TEST: ${{ inputs.TEST == true || github.event.client_payload.TEST == true }}
 
   # 编译成功后记录上游 SHA
   record_sha:
@@ -114,7 +116,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.config.result == 'success' &&
-      inputs.TEST != true
+      inputs.TEST != true && github.event.client_payload.TEST != true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
